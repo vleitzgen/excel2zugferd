@@ -14,7 +14,7 @@ from drafthorse.models.accounting import ApplicableTradeTax
 from drafthorse.models.document import Document
 from drafthorse.models.note import IncludedNote
 from drafthorse.models.tradelines import LineItem
-from drafthorse.models.payment import PaymentTerms
+from drafthorse.models.payment import PaymentTerms, PaymentMeans
 from drafthorse.models.party import TaxRegistration
 from drafthorse.pdf import attach_xml
 
@@ -54,7 +54,7 @@ class ZugFeRD:
     def add_note(self, text):
         """Add note to notes"""
         note = IncludedNote()
-        note.content.add(text)
+        note.content = text
         note.subject_code = "REG"
         self.doc.header.notes.add(note)
 
@@ -65,23 +65,19 @@ class ZugFeRD:
 
     def add_zahlungsempfaenger(self, text):
         """set Zahlungsempfaenger to correct value"""
-        self.doc.trade.settlement.payment_means.type_code = (
-            "58"  # SEPA Überweisung else "ZZZ"
-        )
-        self.doc.trade.settlement.payment_means.information.add(
-            "Zahlung per SEPA Überweisung."
-        )
+        pm = PaymentMeans()
+        pm.type_code = "58"  # SEPA Überweisung else "ZZZ"
+        pm.information.add("Zahlung per SEPA Überweisung.")
+        
         arr = text.split("\n")
         # self.doc.trade.settlement.payee.name = arr[0] # BR-17
-        self.doc.trade.settlement.payment_means.payee_account.account_name = arr[0]
+        pm.payee_account.account_name = arr[0]
         if len(arr) > 1:
-            self.doc.trade.settlement.payment_means.payee_account.iban = arr[1].split(
-                " ", 1
-            )[1]
+            pm.payee_account.iban = arr[1].split(" ", 1)[1]
         if len(arr) == 3:
-            self.doc.trade.settlement.payment_means.payee_institution.bic = arr[
-                2
-            ].split(" ", 1)[1]
+            pm.payee_institution.bic = arr[2].split(" ", 1)[1]
+        
+        self.doc.trade.settlement.payment_means.add(pm)
 
     def _add_buyer_from_text(self, text: str) -> None:
         arr = text.split("\n")
