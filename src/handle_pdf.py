@@ -566,7 +566,7 @@ class Pdf(PDF):
         self.print_abspann(
             f"Bitte überweisen Sie den Betrag von {brutto} bis zum \
 {ueberweisungsdatum.strftime(GERMAN_DATE)} auf \
-u.a. Konto.\n\n{abspann}"
+das unten genannte Konto.\n\n{abspann}"
         )
 
     def _get_value(self, tuple) -> str:
