@@ -45,11 +45,11 @@ class PDF(FPDF):
         """
         if len(self.footer_txt) == 0:
             return
-        self.set_y(-15)
-        self.set_font_size(size=8)
-        self.cell(
+        self.set_y(-30)
+        self.set_font_size(size=12)
+        self.multi_cell(
             0,
-            1,
+            5,
             self.footer_txt,
             align="C",
         )
@@ -405,6 +405,7 @@ class Pdf(PDF):
         self.set_lang("de_DE")
         # set left, top and right margin for document
         self.set_margins(25, 16.9, 20)
+        self.set_auto_page_break(True, 35)
         with open(os.path.join("_internal", "sRGB2014.icc"), "rb") as iccp_file:
             icc_profile = PDFICCProfile(
                 contents=iccp_file.read(), n=3, alternate="DeviceRGB"
@@ -423,7 +424,8 @@ class Pdf(PDF):
         populate header with data
         """
         self.set_title(self.invoice.supplier.betriebsbezeichnung)
-        self.footer_txt = self.invoice.supplier_account.oneliner()
+        acc = self.invoice.supplier_account
+        self.footer_txt = f"Kontoempfänger: {acc.name}\nIBAN: {acc.iban}\nBIC: {acc.bic}"
         self.set_author(self.invoice.supplier.name)
 
         self.table_head = (
