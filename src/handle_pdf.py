@@ -425,7 +425,7 @@ class Pdf(PDF):
         """
         self.set_title(self.invoice.supplier.betriebsbezeichnung)
         acc = self.invoice.supplier_account
-        self.footer_txt = f"Kontoempfänger: {acc.name}\nIBAN: {acc.iban}\nBIC: {acc.bic}"
+        self.footer_txt = f"Kontoinhaber:in: {acc.name}\nIBAN: {acc.iban}\nBIC: {acc.bic}"
         self.set_author(self.invoice.supplier.name)
 
         self.table_head = (
