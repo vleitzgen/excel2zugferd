@@ -86,6 +86,9 @@ Damit können die XY-Positionen verändert werden und die Suchfunktion wird abge
 
 ### 0.24.x
 
+- Version 0.24.7:
+    - Anpassung des PDF-Footers: Schriftgröße auf 12pt erhöht, zentriert und auf 3 Zeilen verteilt (Kontoempfänger, IBAN, BIC).
+    - Korrektur der Seitenränder, um Überlappungen mit dem vergrößerten Footer zu vermeiden.
 - Umstellung auf die fpdf2 Release - Version 2.8.3
 - In der PDF wird jetzt unterhalb der Rechnungsnummer `Leistungszeitraum VON - BIS` angezeigt.
 Die Kennzeichnung für die Kleinunternehmerregelung ist von dieser Position jetzt hinter die Rechnungssummen verschoben worden.
