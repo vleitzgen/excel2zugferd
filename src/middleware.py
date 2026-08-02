@@ -373,7 +373,11 @@ erstellen, da ein Problem aufgetreten ist.\n{ex}",
             self.ini_file.create_ini_file(self.ini_file.set_default_content())
         self.setStammdatenToInvoiceCollection()
         self.save_working_directory(filename)
-        self.excel_file = ExcelContent(filename, "")
+        try:
+            self.excel_file = ExcelContent(filename, "")
+        except ValueError as ex:
+            self._error_msg("Fehler beim Öffnen der Excel-Datei:", ex.args[0])
+            return
         if pdf_filename is not None:
             self.invoiceCollection.management.pdf_filename = pdf_filename
             self.invoiceCollection.management.BYOPdf = True

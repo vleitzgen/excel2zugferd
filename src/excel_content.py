@@ -32,9 +32,10 @@ class ExcelContent:
         try:
             self.xlsx = pd.ExcelFile(self.path)
             pd.options.mode.copy_on_write = True
-        except FileNotFoundError:
-            print(f"file not found '{self.path}'")
-            pass
+        except (FileNotFoundError, PermissionError, OSError) as ex:
+            raise ValueError(
+                f"Ich kann die Excel-Datei '{self.path}' nicht öffnen.\n{ex}"
+            ) from ex
 
     def read_sheet_list(self):
         """Read the List of Sheets in this Excel File"""

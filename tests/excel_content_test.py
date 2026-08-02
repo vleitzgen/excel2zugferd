@@ -3,6 +3,7 @@ Modul excel_content_test
 """
 
 from unittest import TestCase
+from unittest.mock import patch
 from datetime import datetime, time
 import os
 import numpy as np
@@ -154,6 +155,16 @@ class TestExcelContent(TestCase):
         retval = self.xlsx.read_sheet_list()
         # print (retval)
         self.assertEqual(retval, expected, "Excel File should contain expected sheets")
+
+    def test_init_raises_value_error_when_excel_file_cannot_be_opened(self):
+        """Ein Zugriff auf die Excel-Datei soll als verständlicher Fehler hochkommen."""
+        with patch(
+            "src.excel_content.pd.ExcelFile",
+            side_effect=PermissionError("[Errno 13] Permission denied"),
+        ):
+            with self.assertRaises(ValueError) as ctx:
+                ExcelContent("blocked.xlsx", ".")
+        self.assertIn("blocked.xlsx", str(ctx.exception))
 
     def test_read_sheet(self):
         """

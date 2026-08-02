@@ -77,7 +77,17 @@ class OberflaecheExcel2Zugferd(src.oberflaeche_base.Oberflaeche):
 
     def _read_sheet_list(self) -> list:
         """creates ExcelContent from filename, reads sheet list"""
-        self.middleware.excel_file = ExcelContent(self.filename, "")
+        try:
+            self.middleware.excel_file = ExcelContent(self.filename, "")
+        except ValueError as ex:
+            messagebox.showerror("Fehler beim Öffnen der Excel-Datei", ex.args[0])
+            self.middleware.excel_file = None
+            self.filename = None
+            self.file_name_label.config(
+                text="Bitte erst die Excel Datei auswählen\n (über Datei -> Öffnen...)."
+            )
+            self.lb.delete(0, "end")
+            return
         self.file_name_label.config(text=self.filename)
         self.lb.delete(0, "end")
         items = self.middleware.excel_file.read_sheet_list()
@@ -109,7 +119,8 @@ kann nicht beschrieben werden.\n{ex}",
         self._file_dialog(self.middleware.get_working_directory())
         if len(self.filename) > 0 and Path(self.filename).exists():
             self._read_sheet_list()
-            self._try_to_save_Verzeichnis()
+            if self.middleware.excel_file is not None:
+                self._try_to_save_Verzeichnis()
 
     def mouse_click(self, event):  # pylint: disable=unused-argument
         """
