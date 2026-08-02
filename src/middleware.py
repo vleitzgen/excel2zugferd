@@ -212,6 +212,11 @@ class Middleware:
             if hasattr(self.ini_file, "get_active_company_content")
             else self.ini_file.read_ini_file()
         )
+        if "Betriebsbezeichnung" not in contentini_file:
+            contentini_file = {
+                **self.ini_file.set_default_content(),
+                **contentini_file,
+            }
         # print("_getStammdatenToInvoiceCollection:\n", contentini_file)
         return self._try_to_fill_stammdaten(self.invoiceCollection, contentini_file)
 
@@ -221,7 +226,7 @@ class Middleware:
         """returns True if error in stammdaten occurs"""
         try:
             invoiceCollection.set_stammdaten(stammdaten)
-        except ValueError as ex:
+        except (ValueError, KeyError) as ex:
             self._error_msg("Fehler in den Stammdaten:", ex.args[0])
             return True
         return False

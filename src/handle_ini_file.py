@@ -96,6 +96,10 @@ class IniFile:
                 with open(self.path, "r", encoding="utf-8") as f_in:
                     self.content = json.load(f_in)
                     self._modify_entries_to_version2()  # noqa E501 should be eliminated in Version 1.0.0
+            except json.JSONDecodeError:
+                # Keep running with empty defaults when an invalid JSON file exists.
+                self.content = {}
+                return {}
             except OSError:
                 return {}
         return self.content
@@ -126,6 +130,15 @@ class IniFile:
         return {
             key: value
             for key, value in self.content.items()
+            if key not in ["Firmen", "AktiveFirma"]
+        }
+
+    def _sanitize_company_content(self, company_content: dict) -> dict:
+        if not isinstance(company_content, dict):
+            return {}
+        return {
+            key: value
+            for key, value in company_content.items()
             if key not in ["Firmen", "AktiveFirma"]
         }
 
@@ -167,6 +180,7 @@ class IniFile:
 
     def save_company(self, company_name: str, company_content: dict) -> None:
         company_name = self._clean_company_name(company_name)
+        company_content = self._sanitize_company_content(company_content)
         if "Firmen" not in self.content or not isinstance(self.content["Firmen"], dict):
             self.content["Firmen"] = {}
         self.content["Firmen"][company_name] = company_content
@@ -181,6 +195,7 @@ class IniFile:
         }
 
     def save_current_company_content(self, company_content: dict) -> None:
+        company_content = self._sanitize_company_content(company_content)
         company_name = (
             company_content.get("Betriebsbezeichnung")
             or self.get_active_company_name()

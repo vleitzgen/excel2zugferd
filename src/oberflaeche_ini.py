@@ -307,7 +307,7 @@ class OberflaecheIniFile(src.oberflaeche_base.Oberflaeche):
         self.root.lift()
 
     def fetch_values_from_entries(self):
-        content = super().fetch_values_from_entries()
+        content = self._get_current_form_content()
         if content and self.middleware and hasattr(
             self.middleware.ini_file, "save_current_company_content"
         ):

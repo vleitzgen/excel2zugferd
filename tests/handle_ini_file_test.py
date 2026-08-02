@@ -284,6 +284,23 @@ class TestIniFile(unittest.TestCase):
             "Export GmbH (2)",
         )
 
+    def test_save_current_company_content_ignores_profile_metadata(self):
+        """
+        Metadaten wie 'Firmen'/'AktiveFirma' dürfen nicht ins Firmenprofil kopiert werden.
+        """
+        self.ini_file_class.content = {"Verzeichnis": "C:/tmp"}
+        self.ini_file_class.save_company(
+            "Firma A",
+            {"Betriebsbezeichnung": "Firma A", "IBAN": "A-IBAN"},
+        )
+
+        full_content = self.ini_file_class.content
+        self.ini_file_class.save_current_company_content(full_content)
+
+        profile = self.ini_file_class.content["Firmen"]["Firma A"]
+        self.assertNotIn("Firmen", profile)
+        self.assertNotIn("AktiveFirma", profile)
+
 
 # if __name__ == '__main__':
 #     unittest.main()
