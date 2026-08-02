@@ -24,7 +24,7 @@ class OberflaecheIniFile(src.oberflaeche_base.Oberflaeche):
     """
 
     def __init__(
-        self, thefields: dict, middleware: Middleware = None, window=None
+        self, thefields: list, middleware: Middleware = None, window=None
     ) -> None:
         super().__init__(window=window, wsize="700x800")  # tk.Toplevel())
         self.fields: dict = thefields

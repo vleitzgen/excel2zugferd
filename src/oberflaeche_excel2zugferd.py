@@ -23,7 +23,7 @@ class OberflaecheExcel2Zugferd(src.oberflaeche_base.Oberflaeche):
     """
 
     def __init__(
-        self, myfields: dict, middleware: Middleware = None, window=None
+        self, myfields: list, middleware: Middleware = None, window=None
     ) -> None:
         super().__init__(window, wsize="480x440")
         self.fields: dict = myfields
