@@ -367,9 +367,14 @@ fehlgeschlagen.\n{ex}",
         Returns:
             str: value for Label
         """
-        if key not in self.middleware.ini_file.content.keys():
+        content = (
+            self.middleware.ini_file.get_active_company_content()
+            if self.middleware and hasattr(self.middleware.ini_file, "get_active_company_content")
+            else self.middleware.ini_file.content
+        )
+        if key not in content.keys():
             return ""
-        return self.middleware.ini_file.content[key] if self.middleware else ""
+        return content[key] if self.middleware else ""
 
     def _get_text_of_field(self, field: any, key: str = None) -> str:
         """get content of field in GUI
@@ -426,7 +431,11 @@ fehlgeschlagen.\n{ex}",
         entries = {}
         content = {}
         if self.middleware.ini_file:
-            content = self.middleware.ini_file.read_ini_file()
+            content = (
+                self.middleware.ini_file.get_active_company_content()
+                if hasattr(self.middleware.ini_file, "get_active_company_content")
+                else self.middleware.ini_file.read_ini_file()
+            )
         for field in self.fields:
             if field["Dest"] == type:
                 # row = tk.Frame(self.root)
@@ -434,6 +443,20 @@ fehlgeschlagen.\n{ex}",
                     self.content_frame, field, content, len(entries) + offset
                 )
         return entries
+
+    def load_values_into_entries(self, content: dict) -> None:
+        if not self.ents:
+            return
+        for key, field in self.ents.items():
+            value = content.get(key, "") if content else ""
+            if hasattr(field, "delete") and hasattr(field, "insert"):
+                field.delete("1.0", "end")
+                if value:
+                    field.insert(tk.END, value)
+            elif isinstance(field, ttk.Label):
+                field.configure(text=value)
+            elif key in self.menuvars:
+                self.menuvars[key].set("1" if value in ["Ja", "1", True] else "0")
 
     def pre_open_excel2zugferd(self):
         obj = src.oberflaeche_excel2zugferd.OberflaecheExcel2Zugferd
@@ -475,8 +498,13 @@ fehlgeschlagen.\n{ex}",
         Returns:
             bool: True if Error in Stammdaten, False if OK
         """
+        validation_content = content
+        if self.middleware and hasattr(
+            self.middleware.ini_file, "get_active_company_content"
+        ):
+            validation_content = self.middleware.ini_file.get_active_company_content()
         try:
-            InvoiceCollection(stammdaten=content)
+            InvoiceCollection(stammdaten=validation_content)
         except ValueError as e:
             messagebox.showerror("Fehler in den Stammdaten", e.args[0])
             return True

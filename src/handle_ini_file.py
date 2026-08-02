@@ -118,6 +118,187 @@ class IniFile:
             else self._get_documents_directory()
         )
 
+    def _get_company_store(self) -> dict:
+        store = self.content.get("Firmen") if isinstance(self.content, dict) else {}
+        return store if isinstance(store, dict) else {}
+
+    def _get_base_content(self) -> dict:
+        return {
+            key: value
+            for key, value in self.content.items()
+            if key not in ["Firmen", "AktiveFirma"]
+        }
+
+    def get_company_names(self) -> list:
+        return list(self._get_company_store().keys())
+
+    def get_active_company_name(self) -> str | None:
+        active_name = self.content.get("AktiveFirma")
+        if active_name in self._get_company_store():
+            return active_name
+        names = self.get_company_names()
+        return names[0] if names else None
+
+    def _clean_company_name(self, company_name: str) -> str:
+        name = (company_name or "").strip()
+        if not name:
+            raise ValueError("Der Firmenname darf nicht leer sein.")
+        return name
+
+    def get_active_company_content(self) -> dict:
+        base_content = self._get_base_content()
+        active_name = self.get_active_company_name()
+        company_store = self._get_company_store()
+        if active_name and active_name in company_store:
+            return {**base_content, **company_store[active_name]}
+        return base_content
+
+    def set_active_company(self, company_name: str) -> None:
+        company_name = self._clean_company_name(company_name)
+        company_store = self._get_company_store()
+        if company_name not in company_store:
+            raise ValueError(f"Die Firma '{company_name}' ist nicht in den Stammdaten vorhanden.")
+        self.content = {
+            **self._get_base_content(),
+            **company_store[company_name],
+            "Firmen": company_store,
+            "AktiveFirma": company_name,
+        }
+
+    def save_company(self, company_name: str, company_content: dict) -> None:
+        company_name = self._clean_company_name(company_name)
+        if "Firmen" not in self.content or not isinstance(self.content["Firmen"], dict):
+            self.content["Firmen"] = {}
+        self.content["Firmen"][company_name] = company_content
+        active_name = self.get_active_company_name() or company_name
+        if active_name not in self.content["Firmen"]:
+            active_name = company_name
+        self.content = {
+            **self._get_base_content(),
+            **self.content["Firmen"][active_name],
+            "Firmen": self.content["Firmen"],
+            "AktiveFirma": active_name,
+        }
+
+    def save_current_company_content(self, company_content: dict) -> None:
+        company_name = (
+            company_content.get("Betriebsbezeichnung")
+            or self.get_active_company_name()
+            or "Standard"
+        )
+        company_name = self._clean_company_name(company_name)
+        company_store = self._get_company_store()
+        company_store[company_name] = {
+            **company_store.get(company_name, {}),
+            **company_content,
+        }
+        self.content = {
+            **self._get_base_content(),
+            **company_store[company_name],
+            "Firmen": company_store,
+            "AktiveFirma": company_name,
+        }
+
+    def delete_company(self, company_name: str) -> None:
+        company_name = self._clean_company_name(company_name)
+        company_store = self._get_company_store()
+        if company_name not in company_store:
+            raise ValueError(f"Die Firma '{company_name}' ist nicht in den Stammdaten vorhanden.")
+
+        del company_store[company_name]
+        base_content = self._get_base_content()
+
+        if not company_store:
+            self.content = base_content
+            return
+
+        active_name = self.content.get("AktiveFirma")
+        if active_name not in company_store:
+            active_name = next(iter(company_store.keys()))
+
+        self.content = {
+            **base_content,
+            **company_store[active_name],
+            "Firmen": company_store,
+            "AktiveFirma": active_name,
+        }
+
+    def rename_company(self, old_name: str, new_name: str) -> str:
+        old_name = self._clean_company_name(old_name)
+        new_name = self._clean_company_name(new_name)
+        company_store = self._get_company_store()
+
+        if old_name not in company_store:
+            raise ValueError(f"Die Firma '{old_name}' ist nicht in den Stammdaten vorhanden.")
+        if old_name != new_name and new_name in company_store:
+            raise ValueError(f"Die Firma '{new_name}' ist bereits vorhanden.")
+
+        company_content = company_store.pop(old_name)
+        company_content = {**company_content, "Betriebsbezeichnung": new_name}
+        company_store[new_name] = company_content
+
+        active_name = self.content.get("AktiveFirma")
+        if active_name == old_name:
+            active_name = new_name
+        if active_name not in company_store:
+            active_name = new_name
+
+        self.content = {
+            **self._get_base_content(),
+            **company_store[active_name],
+            "Firmen": company_store,
+            "AktiveFirma": active_name,
+        }
+        return new_name
+
+    def _get_unique_company_name(self, requested_name: str) -> str:
+        name = self._clean_company_name(requested_name)
+        company_store = self._get_company_store()
+        if name not in company_store:
+            return name
+        idx = 2
+        while f"{name} ({idx})" in company_store:
+            idx += 1
+        return f"{name} ({idx})"
+
+    def export_company_profile(self, company_name: str, file_path: str) -> None:
+        company_name = self._clean_company_name(company_name)
+        company_store = self._get_company_store()
+        if company_name not in company_store:
+            raise ValueError(f"Die Firma '{company_name}' ist nicht in den Stammdaten vorhanden.")
+
+        payload = {
+            "schema": "excel2zugferd-company-profile-v1",
+            "company_name": company_name,
+            "company_content": company_store[company_name],
+        }
+        with open(file_path, "w", encoding="utf-8") as f_out:
+            json.dump(payload, f_out, sort_keys=True, ensure_ascii=False, indent=4)
+
+    def import_company_profile(self, file_path: str, replace_existing: bool = False) -> str:
+        with open(file_path, "r", encoding="utf-8") as f_in:
+            payload = json.load(f_in)
+
+        if not isinstance(payload, dict):
+            raise ValueError("Das Profil hat ein ungültiges Format.")
+        if payload.get("schema") != "excel2zugferd-company-profile-v1":
+            raise ValueError("Das Profilschema wird nicht unterstützt.")
+
+        requested_name = self._clean_company_name(payload.get("company_name", ""))
+        company_content = payload.get("company_content")
+        if not isinstance(company_content, dict):
+            raise ValueError("Die Firmendaten im Profil sind ungültig.")
+
+        target_name = requested_name
+        company_store = self._get_company_store()
+        if target_name in company_store and not replace_existing:
+            target_name = self._get_unique_company_name(target_name)
+
+        company_payload = {**company_content, "Betriebsbezeichnung": target_name}
+        self.save_company(target_name, company_payload)
+        self.set_active_company(target_name)
+        return target_name
+
     def save_working_directory(self, filename: str = None) -> None:
         directory = os.path.dirname(filename)
         self.create_ini_file({**self.content, "Verzeichnis": directory})

@@ -86,6 +86,11 @@ Damit können die XY-Positionen verändert werden und die Suchfunktion wird abge
 
 ### 0.24.x
 
+- Version 0.24.9:
+    - Dynamische Firmenprofile erweitert: Firmen können jetzt umbenannt und gelöscht werden.
+    - Import/Export einzelner Firmenprofile als JSON ergänzt (Wiederverwendung zwischen Installationen).
+    - Verbesserte Validierung für aktive Firmenprofile bei der Stammdatenprüfung.
+
 - Version 0.24.7:
     - Anpassung des PDF-Footers: Schriftgröße auf 12pt erhöht, zentriert und auf 3 Zeilen verteilt (Kontoempfänger, IBAN, BIC).
     - Korrektur der Seitenränder, um Überlappungen mit dem vergrößerten Footer zu vermeiden.
