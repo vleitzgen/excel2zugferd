@@ -20,6 +20,7 @@ import math
 import locale
 import decimal
 from src.constants import P19USTG, GERMAN_DATE
+from src import resource_path
 
 LEFTofABSENDER = 135
 
@@ -383,29 +384,31 @@ class Pdf(PDF):
         import and embed TTF Font to use € in text
         """
         self.add_font(
-            "dejavu-sans", style="", fname="./_internal/Fonts/DejaVuSansCondensed.ttf"
+            "dejavu-sans",
+            style="",
+            fname=resource_path("Fonts", "DejaVuSansCondensed.ttf"),
         )
         self.add_font(
             "dejavu-sans",
             style="b",
-            fname="./_internal/Fonts/DejaVuSansCondensed-Bold.ttf",
+            fname=resource_path("Fonts", "DejaVuSansCondensed-Bold.ttf"),
         )
         self.add_font(
             "dejavu-sans",
             style="i",
-            fname="./_internal/Fonts/DejaVuSansCondensed-Oblique.ttf",
+            fname=resource_path("Fonts", "DejaVuSansCondensed-Oblique.ttf"),
         )
         self.add_font(
             "dejavu-sans",
             style="bi",
-            fname="./_internal/Fonts/DejaVuSansCondensed-BoldOblique.ttf",
+            fname=resource_path("Fonts", "DejaVuSansCondensed-BoldOblique.ttf"),
         )
         # use the font imported
         self.set_font("dejavu-sans")
         self.set_lang("de_DE")
         # set left, top and right margin for document
         self.set_margins(25, 16.9, 20)
-        with open(os.path.join("_internal", "sRGB2014.icc"), "rb") as iccp_file:
+        with open(resource_path("sRGB2014.icc"), "rb") as iccp_file:
             icc_profile = PDFICCProfile(
                 contents=iccp_file.read(), n=3, alternate="DeviceRGB"
             )

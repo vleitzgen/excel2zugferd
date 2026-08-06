@@ -6,7 +6,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from pathlib import Path
 
-from src.excel_content import ExcelContent
 from src.middleware import Middleware
 from src.constants import PADY
 import src
@@ -77,6 +76,8 @@ class OberflaecheExcel2Zugferd(src.oberflaeche_base.Oberflaeche):
 
     def _read_sheet_list(self) -> list:
         """creates ExcelContent from filename, reads sheet list"""
+        from src.excel_content import ExcelContent
+
         self.middleware.excel_file = ExcelContent(self.filename, "")
         self.file_name_label.config(text=self.filename)
         self.lb.delete(0, "end")
