@@ -27,17 +27,14 @@ jobs:
         python-version: "3.11"
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install flake8
         python -m venv .venv
         .venv/Scripts/activate
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install -U git+https://github.com/lka/fpdf2.git@master
-        # git apply --unsafe-paths --verbose .\drafthorse_pdf.patch
+        pip install flake8
     - name: Lint with flake8
       run: |
-        .venv/Scripts/deactivate
+        .venv/Scripts/activate
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude .venv
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
@@ -45,8 +42,6 @@ jobs:
     - name: Test with pytest
       run: |
         .venv/Scripts/activate
-        pip install pytest
-        # dir
         pytest --doctest-modules --junitxml=junit/test-results.xml
     - name: Upload pytest test results
       uses: actions/upload-artifact@v4
@@ -59,13 +54,13 @@ jobs:
       id: vars
       run: |
         Invoke-WebRequest -uri https://github.com/thenativeweb/get-next-version/releases/download/2.6.1/get-next-version-windows-amd64.exe -outfile get-next-version-windows-amd64.exe
-        .\get-next-version-windows-amd64.exe  -p 'v' --target json > version.json
+        .\get-next-version-windows-amd64.exe -p 'v' --target json > _internal/version.json
         echo "MyAppVersion=$(./get-next-version-windows-amd64.exe)" >> $env:GITHUB_OUTPUT
       shell: powershell
     - name: Build with pyinstaller
       run: |
         .venv/Scripts/activate
-        pyinstaller excel2zugferd.py --noconsole --add-data _internal/Fonts:Fonts --add-data ./.venv/Lib/site-packages/drafthorse/schema:drafthorse/schema --add-data version.json:. --add-data _internal/sRGB2014.icc:. --noconfirm
+        pyinstaller --clean --noconfirm Excel2ZugFeRD.spec
     # - name: Compile .ISS to .EXE Installer
     #   uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
     #   with:

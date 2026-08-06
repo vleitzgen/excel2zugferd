@@ -84,6 +84,14 @@ Damit können die XY-Positionen verändert werden und die Suchfunktion wird abge
 
 ## Versionen
 
+### 0.24.5
+
+- Fehlerbehebung für den Start der EXE nach der Installation.
+- Ressourcen wie Schriftarten, ICC-Profil und ZUGFeRD-Schema werden unabhängig vom aktuellen Arbeitsverzeichnis gefunden.
+- Verbesserte Fehlermeldungen bei Startfehlern mit Crash-Log unter `%APPDATA%\excel2zugferd`.
+- Optimierter und reproduzierbarer PyInstaller-Build; der vollständige Excel-zu-ZUGFeRD-Workflow wurde mit der erzeugten EXE geprüft.
+- Die CI verwendet ausschließlich die festgelegten Paketversionen aus `requirements.txt`.
+
 ### 0.24.x
 
 - Umstellung auf die fpdf2 Release - Version 2.8.3

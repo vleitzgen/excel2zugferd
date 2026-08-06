@@ -2,17 +2,23 @@
 Module invoice_collection
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from src.invoice import Invoice
 from src.konto import Konto
 from src.steuerung import Steuerung
 from src.lieferant import Lieferant
 from src.kunde import Kunde
-from src.excel_content import ExcelContent
 from src.constants import (
     ANSCHRIFT_DEFAULT_SPALTE,
     RGNR_DEFAULT_SPALTE,
     RGDATUM_REFAULT_SPALTE,
 )
+
+if TYPE_CHECKING:
+    from src.excel_content import ExcelContent
 
 
 class InvoiceCollection(Invoice):

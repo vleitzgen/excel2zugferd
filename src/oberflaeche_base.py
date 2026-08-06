@@ -5,15 +5,14 @@ Module Oberflaechen
 import tkinter as tk
 from tkinter import messagebox, ttk
 import json
-import os
 from pathlib import Path
-from PIL import Image, ImageTk
 import webbrowser
 from src.handle_ini_file import IniFile
 from src.constants import LABELWIDTH, TEXTWIDTH, PADX, PADY
 from src.middleware import Middleware
 import src
 from src.invoice_collection import InvoiceCollection
+from src import resource_path
 
 
 class Oberflaeche:
@@ -165,6 +164,8 @@ class Oberflaeche:
             fn (str): filename of logo
         """
         if fn is not None and Path(fn).exists():
+            from PIL import Image, ImageTk
+
             img = Image.open(fn)
             img = img.resize((100, 100), Image.BOX)
             image = ImageTk.PhotoImage(img)
@@ -216,9 +217,7 @@ class Oberflaeche:
     def info_cmd(self):
         """show Info with Version Number and link to documentation"""
         try:
-            with open(
-                os.path.join("_internal", "version.json"), "r", encoding="utf-16"
-            ) as f_in:
+            with open(resource_path("version.json"), "r", encoding="utf-16") as f_in:
                 version = json.load(f_in)
                 my_msg = f"Copyright © H.Lischka, 2024\n\
 Version {version['version'] if version is not None else 'unbekannt'}\n\n\

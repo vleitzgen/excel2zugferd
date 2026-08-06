@@ -1,18 +1,26 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_data_files
+
+datas = [
+    ('_internal/Fonts', 'Fonts'),
+    ('_internal/version.json', '.'),
+    ('_internal/sRGB2014.icc', '.'),
+] + collect_data_files('drafthorse', includes=['schema/**/*'])
 
 a = Analysis(
     ['excel2zugferd.py'],
     pathex=[],
     binaries=[],
-    datas=[('_internal/Fonts', 'Fonts'), ('./.venv/Lib/site-packages/drafthorse/schema', 'drafthorse/schema'), ('_internal/version.json', '.'), ('_internal/sRGB2014.icc', '.')],
+    datas=datas,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['_pytest', 'mccabe', 'pycodestyle', 'pytest', 'radon'],
     noarchive=False,
-    optimize=0,
+    # NumPy 1.26 reads docstrings at import time, so level 2 is not safe.
+    optimize=1,
 )
 pyz = PYZ(a.pure)
 
@@ -25,7 +33,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
@@ -38,7 +46,7 @@ coll = COLLECT(
     a.binaries,
     a.datas,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     name='excel2zugferd',
 )

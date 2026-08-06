@@ -2,6 +2,8 @@
 Modul Middleware
 """
 
+from __future__ import annotations
+
 from tkinter import messagebox, filedialog
 from pathlib import Path
 import logging
@@ -9,13 +11,17 @@ import shutil
 import tempfile
 import os
 import sys
+from typing import TYPE_CHECKING
+
 from src.handle_ini_file import IniFile
 from src.invoice_collection import InvoiceCollection
-from src.excel_content import ExcelContent
-from src.handle_pdf import Pdf
-from src.handle_zugferd import ZugFeRD
 from src.windowseventlog import WindowsEventLogHandler
 import src
+
+if TYPE_CHECKING:
+    from src.excel_content import ExcelContent as _ExcelContent
+    from src.handle_pdf import Pdf as _Pdf
+    from src.handle_zugferd import ZugFeRD as _ZugFeRD
 
 
 class Middleware:
@@ -26,8 +32,9 @@ class Middleware:
     def __init__(self):
         self.ini_file: IniFile = None
         self.invoiceCollection: InvoiceCollection = InvoiceCollection()
-        self.excel_file: ExcelContent = None
-        self.zugferd: ZugFeRD = None
+        self.excel_file: _ExcelContent = None
+        self.zugferd: _ZugFeRD = None
+        self.pdf: _Pdf = None
         self.quiet: bool = False
         self.logger: logging.Logger = None
         self.pdf_filename: str = None
@@ -232,7 +239,7 @@ class Middleware:
         return False
 
     def _try_to_fill_excel_daten(
-        self, invoiceCollection: InvoiceCollection, daten: ExcelContent
+        self, invoiceCollection: InvoiceCollection, daten: _ExcelContent
     ) -> bool:
         """returns True if error in stammdaten occurs"""
         try:
@@ -245,6 +252,8 @@ class Middleware:
 
     def try_to_init_pdf(self, logo_fn: str) -> bool:
         """returns True if error occurs"""
+        from src.handle_pdf import Pdf
+
         try:
             self.pdf = Pdf(logo_fn if Path(logo_fn).exists() else None)
         except ValueError as ex:
@@ -263,6 +272,8 @@ class Middleware:
 
     def create_ZugFeRD(self) -> bool:
         """returns True on Failure"""
+        from src.handle_zugferd import ZugFeRD
+
         try:
             self.zugferd = ZugFeRD(self.invoiceCollection)
         except Exception as ex:
@@ -369,6 +380,8 @@ erstellen, da ein Problem aufgetreten ist.\n{ex}",
     def quiet_workflow(
         self, filename: str, sheetnr: int, pdf_filename: str = None
     ) -> None:
+        from src.excel_content import ExcelContent
+
         if self.ini_file.exists_ini_file() is None:
             self.ini_file.create_ini_file(self.ini_file.set_default_content())
         self.setStammdatenToInvoiceCollection()

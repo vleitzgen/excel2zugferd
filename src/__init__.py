@@ -1,10 +1,6 @@
 import os
-import src.oberflaeche_base
-import src.oberflaeche_excel2zugferd
-import src.oberflaeche_ini
-import src.oberflaeche_steuerung
-import src.oberflaeche_excelpositions
-import src.oberflaeche_excelsteuerung  # noqa F404
+import sys
+from pathlib import Path
 
 
 def _normalize(arr_in: list) -> list:
@@ -25,3 +21,11 @@ def logo_fn() -> str:
     return os.path.join(
         os.getenv("APPDATA"), "excel2zugferd", "logo.jpg"  # type: ignore
     )
+
+
+def resource_path(*parts: str) -> Path:
+    if getattr(sys, "frozen", False):
+        resource_root = Path(sys._MEIPASS)  # type: ignore[attr-defined]
+    else:
+        resource_root = Path(__file__).resolve().parent.parent / "_internal"
+    return resource_root.joinpath(*parts)
